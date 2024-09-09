@@ -1,0 +1,21 @@
+{
+    "name": "chehine/role-manager",
+    "description": "You can use this package whenever you want to integrate an access control system based on roles in a project with MySQL as your RDBMS. It is easy to use and can be integrated with any php framework in the same way.",
+    "type": "library",
+
+    "require": {
+        "vlucas/phpdotenv": "5.6.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "MxRoleManager\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Chehine Ammari",
+            "email": "chehine.ammari@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}

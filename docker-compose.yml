@@ -1,0 +1,37 @@
+version: '2.23'
+services:
+    composer:
+        image: composer:latest
+        command: [ "composer","install" ]
+        volumes:
+            - /Volumes/Dev/MxRoleManager:/app
+
+    app:
+        image: php:8.2-cli-alpine
+        container_name: mx-role-manager-app
+        volumes:
+            - /Volumes/Dev/MxRoleManager:/app
+        environment:
+            - APP_ENV=prod
+        depends_on:
+            - db
+
+    db:
+        image: mysql:8.1.0
+        container_name: mx-role-manager-db
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: '0000'
+            MYSQL_ROOT_HOST: '%'
+        ports:
+            - "3307:3306"
+        command: --default-authentication-plugin=mysql_native_password
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin-container
+        restart: always
+        ports:
+            - "80:80"
+        environment:
+            PMA_HOST: db
