@@ -1,4 +1,77 @@
 #!/usr/bin/env php
 <?php
 
+use MxRoleManager\CLI\CommandBus;
+use MxRoleManager\CLI\CreateTablesCommand;
+use MxRoleManager\CLI\FillPermissionsCommand;
+use MxRoleManager\CLI\Handler\CreateTablesCommandHandler;
+use MxRoleManager\CLI\Handler\FillPermissionsCommandHandler;
+use MxRoleManager\Config\ConfigLoader;
+use MxRoleManager\Config\ConfigManager;
+use MxRoleManager\Config\Handler\ConfigHandlerFactory;
+use MxRoleManager\Database\Migration\CreateTables;
+use MxRoleManager\Database\Migration\FillPermissions;
+
 require dirname(__DIR__) . '/vendor/autoload.php';
+
+//Command:
+// * docker-compose run --rm app php /app/bin/role-manager --config-file="/app/custom_config.php" fill-permissions
+// OR
+// * docker-compose run --rm app php /app/bin/role-manager fill-permissions --config-file="/app/custom_config.php"
+
+// CLI Input handling
+$arguments = $argv ?? [];
+
+if (count($arguments) < 2) {
+    echo "Usage: role-manager <command> [options...]\n";
+    exit(1);
+}
+
+$commandName = $arguments[2];
+$tables = array_slice($arguments, 3); // Get any additional table names from the CLI
+
+$longOptions  = [
+    "config-file:",  // The colon indicates that this option requires a value
+];
+
+$shortOptions = "c:";
+
+$options = getopt($shortOptions, $longOptions);
+
+
+$commandBus = new CommandBus();
+
+// Register the handlers
+$commandBus->registerHandler(
+    CreateTablesCommand::class,
+    new CreateTablesCommandHandler(new CreateTables())
+);
+$commandBus->registerHandler(
+    FillPermissionsCommand::class,
+    new FillPermissionsCommandHandler(new FillPermissions())
+);
+$env = \Dotenv\Dotenv::createImmutable(getcwd());
+$env->load();
+
+$configurationFile = $options["config-file"] ?? null;
+var_dump($configurationFile);
+$configurationManager = new ConfigManager();
+$configurationManager->addConfigHandler(ConfigHandlerFactory::createEnvHandler(getcwd()));
+$configurationManager->addConfigHandler(ConfigHandlerFactory::createPHPFileHandler($configurationFile));
+//$configLoader = new ConfigLoader($configurationManager);
+$configurationManager->flushConfigurationsToLoader();
+
+// Dispatch commands based on input
+switch ($commandName) {
+    case 'create-tables':
+        $commandBus->handle(new CreateTablesCommand($tables));
+        echo "Tables created successfully.\n";
+        break;
+    case 'fill-permissions':
+        $commandBus->handle(new FillPermissionsCommand());
+        echo "Permissions added successfully.\n";
+        break;
+    default:
+        echo "Unknown command: $commandName\n";
+        break;
+}
