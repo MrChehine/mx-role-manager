@@ -8,6 +8,8 @@ use MxRoleManager\Database\Connection;
 use MxRoleManager\Database\Repository\PermissionRepository;
 use MxRoleManager\Database\Repository\RoleManagerRepository;
 use MxRoleManager\Database\Repository\RoleRepository;
+use MxRoleManager\Model\Permission;
+use MxRoleManager\Model\Role;
 use PDO;
 
 class RoleManager
@@ -20,17 +22,17 @@ class RoleManager
     /**
      * @param string|null $configFilePath
      */
-    public function __construct(?string $configFilePath)
+    public function __construct(?string $configFilePath = null, ?string $dotEnfFilePath = null)
     {
         $configurationManager = new ConfigManager();
-        $configurationManager->addConfigHandler(ConfigHandlerFactory::createEnvHandler('/app'));
+        $configurationManager->addConfigHandler(ConfigHandlerFactory::createEnvHandler($dotEnfFilePath));
         $configurationManager->addConfigHandler(ConfigHandlerFactory::createPHPFileHandler($configFilePath));
         $configurationManager->flushConfigurationsToLoader();
 
         $pdo = Connection::getPdo();
         self::$roleManagerRepository = new RoleManagerRepository($pdo);
-        self::$permissionRepository = new PermissionRepository($pdo);
-        self::$roleRepository = new RoleRepository($pdo);
+        self::$permissionRepository = PermissionRepository::getInstance($pdo);
+        self::$roleRepository = RoleRepository::getInstance($pdo);
     }
 
     public static function getAllRoles() : array
@@ -48,6 +50,11 @@ class RoleManager
         return self::$permissionRepository->getPermissionsForTarget($targetId);
     }
 
+    public static function getPermissionsForRole(Role $role) : array
+    {
+        return self::$permissionRepository->getPermissionsForRole($role);
+    }
+
     public static function getPermissionsForClass(string $className) : array
     {
         return self::$permissionRepository->getPermissionsForClass($className);
@@ -56,6 +63,16 @@ class RoleManager
     public static function getControlledClasses() : array
     {
         return self::$roleManagerRepository->getControlledClasses();
+    }
+
+    public static function persistRole(Role $role) : bool
+    {
+        return self::$roleRepository->persistRole($role);
+    }
+
+    public static function addPermissionToRole(Permission $permission, Role $role) : bool
+    {
+        return self::$roleManagerRepository->addPermissionToRole($permission, $role);
     }
 
     public static function isPermitted(int $targetId, ?string $className = null, ?string $methodName = null) : bool

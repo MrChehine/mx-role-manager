@@ -2,24 +2,23 @@
 
 namespace MxRoleManager\CLI\Handler;
 
+use MxRoleManager\CLI\AbstractCommand;
 use MxRoleManager\CLI\CreateTablesCommand;
 use MxRoleManager\Database\Migration\CreateTables;
 
-class CreateTablesCommandHandler
+class CreateTablesCommandHandler extends AbstractCommandHandler
 {
-    private $migration;
+    private CreateTables $migration;
 
     public function __construct(CreateTables $migration)
     {
         $this->migration = $migration;
     }
 
-    public function handle(CreateTablesCommand $command)
+    public function handle(AbstractCommand $command = null) : void
     {
-        $tables = $command->getTables();
-
         // Call migration logic to create the specified tables
-        $this->migration->run($tables);
+        $this->migration->run();
     }
 
 }

@@ -2,23 +2,31 @@
 
 namespace MxRoleManager\CLI;
 
+use Exception;
+use MxRoleManager\CLI\Handler\AbstractCommandHandler;
+
 class CommandBus
 {
+    /**
+     * @var AbstractCommandHandler[]
+     */
     private array $handlers = [];
 
-    public function registerHandler(string $commandClass, $handler)
+    public function registerHandler(string $commandClass, AbstractCommandHandler $handler) : void
     {
         $this->handlers[$commandClass] = $handler;
     }
 
-    public function handle($command)
+    /**
+     * @throws Exception
+     */
+    public function handle(AbstractCommand $command) : void
     {
         $commandClass = get_class($command);
         if (!isset($this->handlers[$commandClass])) {
-            throw new \Exception("No handler registered for command: " . $commandClass);
+            throw new Exception("No handler registered for command: " . $commandClass);
         }
-
-        return $this->handlers[$commandClass]->handle($command);
+        $this->handlers[$commandClass]->handle($command);
     }
 
 }

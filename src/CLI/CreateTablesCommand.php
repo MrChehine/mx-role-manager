@@ -2,7 +2,7 @@
 
 namespace MxRoleManager\CLI;
 
-class CreateTablesCommand
+class CreateTablesCommand extends AbstractCommand
 {
 
     private array $tables;

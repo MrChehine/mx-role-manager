@@ -5,20 +5,30 @@ namespace MxRoleManager\Model;
 class Permission
 {
 
-    private string $name;
-    private string $description;
-    private string $className;
-    private string $methodName;
+    private ?string $id;
+    private ?string $name;
+    private ?string $description;
+    private ?string $className;
+    private ?string $methodName;
     private \DateTime $createdAt;
     private ?\DateTime $updatedAt;
 
-    public function __construct($value = array())
+    /**
+     * @param string|null $name
+     * @param string|null $description
+     * @param string|null $className
+     * @param string|null $methodName
+     */
+    public function __construct(?string $name = null, ?string $description = null, ?string $className = null, ?string $methodName = null)
     {
-        if(!empty($value))
-            $this->hydrate($value);
+        $this->name = $name;
+        $this->description = $description;
+        $this->className = $className;
+        $this->methodName = $methodName;
     }
 
-    public function hydrate($data)
+
+    public function hydrate($data) : void
     {
         foreach ($data as $attribute => $value) {
             $method = 'set'.str_replace(' ', '', ucwords(str_replace('_', ' ', $attribute)));
@@ -29,9 +39,25 @@ class Permission
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getName(): string
+    public function getId(): ?string
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param string $id
+     */
+    public function setId(string $id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -45,9 +71,9 @@ class Permission
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getDescription(): string
+    public function getDescription(): ?string
     {
         return $this->description;
     }
@@ -61,9 +87,9 @@ class Permission
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getClassName(): string
+    public function getClassName(): ?string
     {
         return $this->className;
     }
@@ -77,9 +103,9 @@ class Permission
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getMethodName(): string
+    public function getMethodName(): ?string
     {
         return $this->methodName;
     }

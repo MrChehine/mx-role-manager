@@ -2,37 +2,66 @@
 
 namespace MxRoleManager\Database\Migration;
 
+use MxRoleManager\CLI\AbstractCommand;
 use MxRoleManager\CLI\FillPermissionsCommand;
 use MxRoleManager\Config\ConfigLoader;
 use MxRoleManager\Database\Connection;
+use MxRoleManager\Database\Repository\PermissionRepository;
 use MxRoleManager\Model\Permission;
 
 class FillPermissions
 {
-    public static function run(FillPermissionsCommand $command) : void
+    /**
+     * @param FillPermissionsCommand|null $command
+     * @return void
+     */
+    public static function run(AbstractCommand $command = null) : void
     {
-        $basePath = dirname(__DIR__);
         $pdo = Connection::getPdo();
+        $permissionRepository = PermissionRepository::getInstance($pdo);
+        $isUpdate = $command != null && $command->isUpdate();
+        $isClearCache = $command != null && $command->isClearCache();
+        $isTruncate = $command != null && $command->isTruncate();
 
-        $permissionsConfig = ConfigLoader::getPermissionsConfig();
-        foreach($permissionsConfig as $className => $configurations)
+        if($isClearCache)
         {
-            $permission = new Permission();
-            $permission->setClassName($className);
-            $permission->setMethodName($configurations['method'] ?? '');
-            $permission->setName($configurations['name'] ?? '');
-            $permission->setDescription($configurations['description'] ?? '');
-            //$permission->setCreatedAt(new \DateTime('now'));
-            //$permission->setUpdatedAt(null);
-
-            $query = "INSERT INTO permissions(name,description,class_name,method_name,created_at) VALUES (:name, :description, :class_name, :method_name, now())";
-            $statement = $pdo->prepare($query);
-            $statement->execute([
-                'name' => $permission->getName(),
-                'description' => $permission->getDescription(),
-                'class_name' => $permission->getClassName(),
-                'method_name' => $permission->getMethodName()
-            ]);
+            ConfigLoader::clearPermissionsConfigCache();
         }
+        if($isTruncate)
+        {
+            ConfigLoader::clearPermissionsConfigCache();
+            $permissionRepository->truncatePermissions();
+        }
+        $permissionsConfig = ConfigLoader::getFilterData();
+        foreach($permissionsConfig['newData'] as $className => $configurations)
+        {
+            foreach ($configurations as $configuration)
+            {
+                $permission = self::createPermissionFromConfiguration($className, $configuration);
+                $permissionRepository->persistPermission($permission);
+            }
+        }
+        if($isUpdate)
+        {
+            foreach($permissionsConfig['updatedData'] as $className => $configurations)
+            {
+                foreach($configurations as $key => $configuration)
+                {
+                    $oldPermissionConfig = ConfigLoader::getCachedConfig()[$className][$key];
+                    $oldPermission = self::createPermissionFromConfiguration($className, $oldPermissionConfig);
+                    $newPermission = self::createPermissionFromConfiguration($className, $configuration);
+                    $permissionRepository->updatePermission($oldPermission, $newPermission);
+                }
+            }
+        }
+        ConfigLoader::addPermissionsConfigToCache($isUpdate ? [] : $permissionsConfig['updatedData']);
+    }
+
+    private static function createPermissionFromConfiguration(string $className, array $configuration) : Permission
+    {
+        $permissionName = $configuration['name'] ?? '';
+        $permissionDescription = $configuration['description'] ?? '';
+        $permissionMethodName = $configuration['method'] ?? '';
+        return new Permission($permissionName, $permissionDescription, $className, $permissionMethodName);
     }
 }

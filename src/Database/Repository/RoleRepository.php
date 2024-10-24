@@ -7,13 +7,23 @@ use MxRoleManager\Model\Role;
 
 class RoleRepository
 {
+    private static ?RoleRepository $instance = null;
     private \PDO $pdo;
     private string $targetTableName;
 
-    public function __construct(\PDO $pdo)
+    private function __construct(\PDO $pdo)
     {
         $this->pdo = $pdo;
         $this->targetTableName = ConfigLoader::getDatabaseTargetTable();
+    }
+
+    public static function getInstance(\PDO $pdo) : RoleRepository
+    {
+        if(self::$instance == null)
+        {
+            self::$instance = new self($pdo);
+        }
+        return self::$instance;
     }
 
     public function getAllRoles() : array
@@ -25,7 +35,9 @@ class RoleRepository
         $results = $this->pdo->query($query, \PDO::FETCH_ASSOC)->fetchAll();
         foreach ($results as $result)
         {
-            $roles[] = new Role($result);
+            $role = new Role();
+            $role->hydrate($result);
+            $roles[] = $role;
         }
 
         return $roles;
@@ -43,10 +55,21 @@ class RoleRepository
 
         while($row = $statement->fetch(\PDO::FETCH_ASSOC))
         {
-            $role = new Role($row);
+            $role = new Role();
+            $role->hydrate($row);
             $roles[] = $role;
         }
 
         return $roles;
+    }
+
+    public function persistRole(Role $role) : bool
+    {
+        $query = "INSERT INTO roles(name, description, created_at) VALUES(:name, :description, NOW())";
+        $statement = $this->pdo->prepare($query);
+        return $statement->execute([
+            'name' => $role->getName(),
+            'description' => $role->getDescription()
+        ]);
     }
 }

@@ -5,18 +5,19 @@ namespace MxRoleManager\Model;
 class Role
 {
 
-    private string $name;
-    private string $description;
+    private ?string $id;
+    private ?string $name;
+    private ?string $description;
     private \DateTime $createdAt;
     private ?\DateTime $updatedAt;
 
-    public function __construct($value = array())
+    public function __construct(?string $name = null, ?string $description = null)
     {
-        if(!empty($value))
-            $this->hydrate($value);
+        $this->name = $name;
+        $this->description = $description;
     }
 
-    public function hydrate($data)
+    public function hydrate($data) : void
     {
         foreach ($data as $attribute => $value) {
             $method = 'set'.str_replace(' ', '', ucwords(str_replace('_', ' ', $attribute)));
@@ -27,9 +28,25 @@ class Role
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getName(): string
+    public function getId(): ?string
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param string $id
+     */
+    public function setId(string $id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -43,9 +60,9 @@ class Role
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getDescription(): string
+    public function getDescription(): ?string
     {
         return $this->description;
     }

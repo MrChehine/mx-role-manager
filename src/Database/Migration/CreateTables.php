@@ -8,7 +8,7 @@ use MxRoleManager\Database\Connection;
 class CreateTables
 {
 
-    public static function run($tables) : void
+    public static function run() : void
     {
         $basePath = dirname(__DIR__);
         $pdo = Connection::getPdo();
@@ -24,7 +24,7 @@ class CreateTables
 
         $createRolesTargetsTableSQL = file_get_contents($basePath."/sql/create_roles_targets_table.sql");
         $targetTable = ConfigLoader::getDatabaseTargetTable();
-        if($targetTable !== null)
+        if($targetTable !== null && $targetTable !== 'targets')
         {
             //$createRolesTargetsTableSQL = str_replace("target_id", $targetTable.'_id', $createRolesTargetsTableSQL);
             $createRolesTargetsTableSQL = str_replace("roles_targets", 'roles_'.$targetTable, $createRolesTargetsTableSQL);

@@ -38,20 +38,27 @@ echo "\n
 
 //var_dump($pdo);
 
-$role_manager = new RoleManager(__DIR__.'/custom_config.php');
+$role_manager = new RoleManager(__DIR__.'/custom_config.php', '/app');
 
-$configurationManager = new \MxRoleManager\Config\ConfigManager();
-$configurationManager->addConfigHandler(ConfigHandlerFactory::createEnvHandler('/app'));
-$configurationManager->addConfigHandler(ConfigHandlerFactory::createPHPFileHandler(__DIR__.'/custom_config.php'));
-$databaseUsername = $configurationManager->getParameter('DB_USER');
+//$configurationManager = new \MxRoleManager\Config\ConfigManager();
+//$configurationManager->addConfigHandler(ConfigHandlerFactory::createEnvHandler('/app'));
+//$configurationManager->addConfigHandler(ConfigHandlerFactory::createPHPFileHandler(__DIR__.'/custom_config.php'));
+//$databaseUsername = $configurationManager->getParameter('DB_USER');
 
 //\MxRoleManager\Database\Migration\CreateTables::run();
 //\MxRoleManager\Database\Migration\FillPermissions::run();
 
 $role_manager->updateRole();
 //var_dump($role_manager::getPermissionsForTarget(1)[0]->getDescription());
-var_dump($role_manager::getPermissionsForClass(RoleManager::class));
-var_dump($role_manager::getRolesForTarget(1));
-var_dump($role_manager::getControlledClasses());
-var_dump($role_manager::getPermissionsForClass($role_manager::getControlledClasses()[0]));
-var_dump($role_manager::getAllRoles());
+//var_dump($role_manager::getPermissionsForClass(RoleManager::class));
+//var_dump($role_manager::getRolesForTarget(1));
+//var_dump($role_manager::getControlledClasses());
+//var_dump($role_manager::getPermissionsForClass($role_manager::getControlledClasses()[0]));
+//var_dump($role_manager::getAllRoles());
+//$role = $role_manager::getAllRoles()[1];
+//$permission = $role_manager::getPermissionsForClass(RoleManager::class)[0];
+//
+//var_dump($role_manager::getPermissionsForRole($role));
+//var_dump($role_manager::addPermissionToRole($permission, $role));
+
+var_dump(\MxRoleManager\Config\ConfigLoader::getFilterData());

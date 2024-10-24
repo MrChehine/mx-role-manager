@@ -7,9 +7,9 @@ class FileConfigHandler implements ConfigHandlerInterface
 
     private array $configurations;
 
-    public function __construct(string $configFile)
+    public function __construct(?string $configFile)
     {
-        if(file_exists($configFile))
+        if($configFile != null && file_exists($configFile))
         {
             $this->configurations = include $configFile;
         }

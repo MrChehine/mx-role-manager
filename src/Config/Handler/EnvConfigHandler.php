@@ -5,10 +5,13 @@ namespace MxRoleManager\Config\Handler;
 class EnvConfigHandler implements ConfigHandlerInterface
 {
 
-    public function __construct(string $pathToDotEnv)
+    public function __construct(?string $pathToDotEnv)
     {
-        $env = \Dotenv\Dotenv::createImmutable($pathToDotEnv);
-        $env->load();
+        if($pathToDotEnv != null)
+        {
+            $env = \Dotenv\Dotenv::createImmutable($pathToDotEnv);
+            $env->load();
+        }
     }
 
     function getParameter(string $parameterName): ?string
