@@ -19,6 +19,7 @@ class RoleManager
     private RoleManagerRepository $roleManagerRepository;
     private PermissionRepository $permissionRepository;
     private RoleRepository $roleRepository;
+    private static RoleManager $instance;
 
     /**
      * @param string|null $configFilePath
@@ -35,6 +36,8 @@ class RoleManager
         $this->roleManagerRepository = new RoleManagerRepository($pdo);
         $this->permissionRepository = PermissionRepository::getInstance($pdo);
         $this->roleRepository = RoleRepository::getInstance($pdo);
+
+        self::$instance = $this;
     }
 
     public function getRoleById(string $roleId) : Role
@@ -107,8 +110,7 @@ class RoleManager
         $className = debug_backtrace()[1]['class'] ?? '';
         $methodName = debug_backtrace()[1]['function'] ?? '';
 
-        $pdo = Connection::getPdo();
-        $permissionsRepository = PermissionRepository::getInstance($pdo);
+        $permissionsRepository = self::$instance->permissionRepository;
         $permissions = $permissionsRepository->getPermissionsByTarget($targetId);
 
         foreach($permissions as $permission)
