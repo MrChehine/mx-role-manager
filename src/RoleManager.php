@@ -16,9 +16,9 @@ use PDO;
 class RoleManager
 {
 
-    private static RoleManagerRepository $roleManagerRepository;
-    private static PermissionRepository $permissionRepository;
-    private static RoleRepository $roleRepository;
+    private RoleManagerRepository $roleManagerRepository;
+    private PermissionRepository $permissionRepository;
+    private RoleRepository $roleRepository;
 
     /**
      * @param string|null $configFilePath
@@ -32,74 +32,74 @@ class RoleManager
         $configurationManager->flushConfigurationsToLoader();
 
         $pdo = Connection::getPdo();
-        self::$roleManagerRepository = new RoleManagerRepository($pdo);
-        self::$permissionRepository = PermissionRepository::getInstance($pdo);
-        self::$roleRepository = RoleRepository::getInstance($pdo);
+        $this->roleManagerRepository = new RoleManagerRepository($pdo);
+        $this->permissionRepository = PermissionRepository::getInstance($pdo);
+        $this->roleRepository = RoleRepository::getInstance($pdo);
     }
 
-    public static function getRoleById(string $roleId) : Role
+    public function getRoleById(string $roleId) : Role
     {
-        return self::$roleRepository->getRoleById($roleId);
+        return $this->roleRepository->getRoleById($roleId);
     }
 
-    public static function getAllRoles() : array
+    public function getAllRoles() : array
     {
-        return self::$roleRepository->getAllRoles();
+        return $this->roleRepository->getAllRoles();
     }
 
-    public static function getRolesForTarget(string $targetId) : array
+    public function getRolesByTarget(string $targetId) : array
     {
-        return self::$roleRepository->getRolesForTarget($targetId);
+        return $this->roleRepository->getRolesByTarget($targetId);
     }
 
-    public static function getPermissionById(string $permissionId) : Permission
+    public function getPermissionById(string $permissionId) : Permission
     {
-        return self::$permissionRepository->getPermissionById($permissionId);
+        return $this->permissionRepository->getPermissionById($permissionId);
     }
 
-    public static function getPermissionsForTarget(string $targetId) : array
+    public function getPermissionsByTarget(string $targetId) : array
     {
-        return self::$permissionRepository->getPermissionsByTarget($targetId);
+        return $this->permissionRepository->getPermissionsByTarget($targetId);
     }
 
-    public static function getPermissionsForRole(Role $role) : array
+    public function getPermissionsByRole(Role $role) : array
     {
-        return self::$permissionRepository->getPermissionsByRole($role);
+        return $this->permissionRepository->getPermissionsByRole($role);
     }
 
-    public static function getPermissionsForClass(string $className) : array
+    public function getPermissionsByClass(string $className) : array
     {
-        return self::$permissionRepository->getPermissionsByClass($className);
+        return $this->permissionRepository->getPermissionsByClass($className);
     }
 
-    public static function removePermissionFromRole(Permission $permission, Role $role) : bool
+    public function removePermissionFromRole(Permission $permission, Role $role) : bool
     {
-        return self::$roleManagerRepository->removePermissionFromRole($permission, $role);
+        return $this->roleManagerRepository->removePermissionFromRole($permission, $role);
     }
 
-    public static function getControlledClasses() : array
+    public function getControlledClasses() : array
     {
-        return self::$roleManagerRepository->getControlledClasses();
+        return $this->roleManagerRepository->getControlledClasses();
     }
 
-    public static function persistRole(Role $role) : bool
+    public function persistRole(Role $role) : bool
     {
-        return self::$roleRepository->persistRole($role);
+        return $this->roleRepository->persistRole($role);
     }
 
-    public static function addPermissionToRole(Permission $permission, Role $role) : bool
+    public function addPermissionToRole(Permission $permission, Role $role) : bool
     {
-        return self::$roleManagerRepository->addPermissionToRole($permission, $role);
+        return $this->roleManagerRepository->addPermissionToRole($permission, $role);
     }
 
-    public static function addRoleToTarget(Role $role, string $targetId) : bool
+    public function addRoleToTarget(Role $role, string $targetId) : bool
     {
-        return self::$roleManagerRepository->addRoleToTarget($role, $targetId);
+        return $this->roleManagerRepository->addRoleToTarget($role, $targetId);
     }
 
-    public static function removeRoleFromTarget(Role $role, string $targetId) : bool
+    public function removeRoleFromTarget(Role $role, string $targetId) : bool
     {
-        return self::$roleRepository->removeRoleFromTarget($role, $targetId);
+        return $this->roleRepository->removeRoleFromTarget($role, $targetId);
     }
 
     public static function isPermitted(int $targetId, ?string $className = null, ?string $methodName = null) : bool
@@ -107,7 +107,9 @@ class RoleManager
         $className = debug_backtrace()[1]['class'] ?? '';
         $methodName = debug_backtrace()[1]['function'] ?? '';
 
-        $permissions = self::getPermissionsForTarget($targetId);
+        $pdo = Connection::getPdo();
+        $permissionsRepository = PermissionRepository::getInstance($pdo);
+        $permissions = $permissionsRepository->getPermissionsByTarget($targetId);
 
         foreach($permissions as $permission)
         {

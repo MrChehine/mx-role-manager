@@ -55,7 +55,7 @@ class RoleRepository
         return $roles;
     }
 
-    public function getRolesForTarget(string $targetId) : array
+    public function getRolesByTarget(string $targetId) : array
     {
         $roles = [];
 
