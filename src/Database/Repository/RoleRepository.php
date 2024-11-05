@@ -26,6 +26,18 @@ class RoleRepository
         return self::$instance;
     }
 
+    public function getRoleById(string $roleId) : ?Role
+    {
+        $query = "SELECT r.* FROM roles r WHERE r.id = :id";
+        $statement = $this->pdo->prepare($query);
+        $statement->execute([':id' => $roleId]);
+
+        $data = $statement->fetch(\PDO::FETCH_ASSOC);
+        $role = $data ? new Role() : null;
+        $role?->hydrate($data);
+        return $role;
+    }
+
     public function getAllRoles() : array
     {
         $roles = [];
@@ -61,6 +73,17 @@ class RoleRepository
         }
 
         return $roles;
+    }
+
+    public function removeRoleFromTarget(Role $role, string $targetId) : bool
+    {
+        $roleId = $role->getId();
+        $query = "DELETE FROM roles_{$this->targetTableName} WHERE role_id = :role_id AND target_id = :target_id";
+        $statement = $this->pdo->prepare($query);
+        return $statement->execute([
+            'role_id' => $roleId,
+            'target_id' => $targetId
+        ]);
     }
 
     public function persistRole(Role $role) : bool

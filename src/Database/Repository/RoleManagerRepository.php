@@ -35,6 +35,18 @@ class RoleManagerRepository
         ]);
     }
 
+    public function removePermissionFromRole(Permission $permission, Role $role) : bool
+    {
+        $permissionId = $permission->getId();
+        $roleId = $role->getId();
+        $query = "DELETE FROM roles_permissions WHERE permission_id = :permission_id AND role_id = :role_id";
+        $statement = $this->pdo->prepare($query);
+        return $statement->execute([
+            'permission_id' => $permissionId,
+            'role_id' => $roleId
+        ]);
+    }
+
     public function addRoleToTarget(Role $role, string $targetId) : bool
     {
         $roleId = $role->getId();

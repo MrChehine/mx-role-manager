@@ -13,11 +13,6 @@ use MxRoleManager\Database\Migration\FillPermissions;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-//Command:
-// * docker-compose run --rm app php /app/bin/role-manager --config-file="/app/custom_config.php" fill-permissions
-// OR
-// * docker-compose run --rm app php /app/bin/role-manager fill-permissions --config-file="/app/custom_config.php"
-
 // CLI Input handling
 $arguments = $argv ?? [];
 
@@ -69,7 +64,7 @@ try {
             $fillPermissionsCommand->setIsTruncate(isset($options['truncate']) || isset($options['t']));
             $fillPermissionsCommand->setIsClearCache(isset($options['clear-cache']) || isset($options['p']));
             $commandBus->handle($fillPermissionsCommand);
-            echo "Permissions filled successfully.\n";
+            echo "Permissions filled/updated successfully.\n";
             break;
         default:
             echo "Unknown command: $commandName\n";

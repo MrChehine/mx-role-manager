@@ -28,7 +28,19 @@ class PermissionRepository
         return self::$instance;
     }
 
-    public function getPermissionsForRole(Role $role) : array
+    public function getPermissionById(string $permissionId) : ?Permission
+    {
+        $query = "SELECT p.* FROM permissions p WHERE p.id = :id";
+        $statement = $this->pdo->prepare($query);
+        $statement->execute([':id' => $permissionId]);
+
+        $data = $statement->fetch(\PDO::FETCH_ASSOC);
+        $permission = $data ? new Permission() : null;
+        $permission?->hydrate($data);
+        return $permission;
+    }
+
+    public function getPermissionsByRole(Role $role) : array
     {
         $permissions = [];
         $roleId = $role->getId();
@@ -48,7 +60,7 @@ class PermissionRepository
         return $permissions;
     }
 
-    public function getPermissionsForTarget(int $targetId) : array
+    public function getPermissionsByTarget(string $targetId) : array
     {
         $permissions = [];
 
@@ -70,7 +82,7 @@ class PermissionRepository
         return $permissions;
     }
 
-    public function getPermissionsForClass(string $className) : array
+    public function getPermissionsByClass(string $className) : array
     {
         $permissions = [];
 
@@ -102,19 +114,30 @@ class PermissionRepository
     }
     public function updatePermission(Permission $oldPermission, Permission $newPermission) : bool
     {
-        $query = "UPDATE permissions SET name = :name, description = :description, class_name = :class_name, method_name = :method_name, updated_at = NOW() WHERE name = :old_name AND description = :old_description AND class_name = :old_class_name AND method_name = :old_method_name";
-        $statement = $this->pdo->prepare($query);
-        return $statement->execute([
+        $whereClause = " WHERE ";
+        $bindValues = [
             'name' => $newPermission->getName(),
             'description' => $newPermission->getDescription(),
             'class_name' => $newPermission->getClassName(),
-            'method_name' => $newPermission->getMethodName(),
-            'old_name' => $oldPermission->getName(),
-            'old_description' => $oldPermission->getDescription(),
-            'old_class_name' => $oldPermission->getClassName(),
-            'old_method_name' => $oldPermission->getMethodName(),
-
-        ]);
+            'method_name' => $newPermission->getMethodName()
+        ];
+        if($oldPermission->getId() != null)
+        {
+            $whereClause .= "id = :id";
+            $bindValues = array_merge(['id' => $oldPermission->getId()], $bindValues);
+        }
+        else{
+            $whereClause .= "name = :old_name AND description = :old_description AND class_name = :old_class_name AND method_name = :old_method_name";
+            $bindValues = array_merge([
+                'old_name' => $oldPermission->getName(),
+                'old_description' => $oldPermission->getDescription(),
+                'old_class_name' => $oldPermission->getClassName(),
+                'old_method_name' => $oldPermission->getMethodName(),
+            ], $bindValues);
+        }
+        $query = "UPDATE permissions SET name = :name, description = :description, class_name = :class_name, method_name = :method_name, updated_at = NOW() {$whereClause}";
+        $statement = $this->pdo->prepare($query);
+        return $statement->execute($bindValues);
     }
 
     public function truncatePermissions() : void

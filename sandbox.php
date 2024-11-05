@@ -47,8 +47,6 @@ $role_manager = new RoleManager(__DIR__.'/custom_config.php', '/app');
 
 //\MxRoleManager\Database\Migration\CreateTables::run();
 //\MxRoleManager\Database\Migration\FillPermissions::run();
-
-$role_manager->updateRole();
 //var_dump($role_manager::getPermissionsForTarget(1)[0]->getDescription());
 //var_dump($role_manager::getPermissionsForClass(RoleManager::class));
 //var_dump($role_manager::getRolesForTarget(1));
@@ -61,4 +59,22 @@ $role_manager->updateRole();
 //var_dump($role_manager::getPermissionsForRole($role));
 //var_dump($role_manager::addPermissionToRole($permission, $role));
 
-var_dump(\MxRoleManager\Config\ConfigLoader::getFilterData());
+//var_dump(\MxRoleManager\Config\ConfigLoader::getFilterData());
+//var_dump($role_manager::getPermissionsForClass(RoleManager::class));
+//$approvalPermission = $role_manager::getPermissionsForClass(\MxRoleManager\Model\Permission::class)[1];
+//$editPermission = $role_manager::getPermissionsForClass(RoleManager::class)[0];
+//$deletePermission = $role_manager::getPermissionsForClass(RoleManager::class)[1];
+//$role = $role_manager::getAllRoles()[0];
+
+//$role_manager::addRoleToTarget($role, '1');
+//$role_manager::addPermissionToRole($approvalPermission, $role);
+//$role_manager::addPermissionToRole($editPermission, $role);
+//$role_manager::addPermissionToRole($deletePermission, $role);
+//var_dump($role_manager::getPermissionById(1));
+
+//$permission = $role_manager::getPermissionById(4);
+//$role = $role_manager::getRoleById(1);
+//$role_manager::removePermissionFromRole($permission, $role);
+
+//$role = $role_manager::getRoleById(1);
+//$role_manager::addRoleToTarget($role, 1);

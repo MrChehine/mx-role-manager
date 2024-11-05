@@ -10,6 +10,7 @@ use MxRoleManager\Database\Repository\RoleManagerRepository;
 use MxRoleManager\Database\Repository\RoleRepository;
 use MxRoleManager\Model\Permission;
 use MxRoleManager\Model\Role;
+use mysql_xdevapi\Session;
 use PDO;
 
 class RoleManager
@@ -21,6 +22,7 @@ class RoleManager
 
     /**
      * @param string|null $configFilePath
+     * @param string|null $dotEnfFilePath
      */
     public function __construct(?string $configFilePath = null, ?string $dotEnfFilePath = null)
     {
@@ -35,6 +37,11 @@ class RoleManager
         self::$roleRepository = RoleRepository::getInstance($pdo);
     }
 
+    public static function getRoleById(string $roleId) : Role
+    {
+        return self::$roleRepository->getRoleById($roleId);
+    }
+
     public static function getAllRoles() : array
     {
         return self::$roleRepository->getAllRoles();
@@ -45,19 +52,29 @@ class RoleManager
         return self::$roleRepository->getRolesForTarget($targetId);
     }
 
-    public static function getPermissionsForTarget(int $targetId) : array
+    public static function getPermissionById(string $permissionId) : Permission
     {
-        return self::$permissionRepository->getPermissionsForTarget($targetId);
+        return self::$permissionRepository->getPermissionById($permissionId);
+    }
+
+    public static function getPermissionsForTarget(string $targetId) : array
+    {
+        return self::$permissionRepository->getPermissionsByTarget($targetId);
     }
 
     public static function getPermissionsForRole(Role $role) : array
     {
-        return self::$permissionRepository->getPermissionsForRole($role);
+        return self::$permissionRepository->getPermissionsByRole($role);
     }
 
     public static function getPermissionsForClass(string $className) : array
     {
-        return self::$permissionRepository->getPermissionsForClass($className);
+        return self::$permissionRepository->getPermissionsByClass($className);
+    }
+
+    public static function removePermissionFromRole(Permission $permission, Role $role) : bool
+    {
+        return self::$roleManagerRepository->removePermissionFromRole($permission, $role);
     }
 
     public static function getControlledClasses() : array
@@ -75,6 +92,16 @@ class RoleManager
         return self::$roleManagerRepository->addPermissionToRole($permission, $role);
     }
 
+    public static function addRoleToTarget(Role $role, string $targetId) : bool
+    {
+        return self::$roleManagerRepository->addRoleToTarget($role, $targetId);
+    }
+
+    public static function removeRoleFromTarget(Role $role, string $targetId) : bool
+    {
+        return self::$roleRepository->removeRoleFromTarget($role, $targetId);
+    }
+
     public static function isPermitted(int $targetId, ?string $className = null, ?string $methodName = null) : bool
     {
         $className = debug_backtrace()[1]['class'] ?? '';
@@ -90,12 +117,6 @@ class RoleManager
             }
         }
         return false;
-    }
-
-    //temporary method for test
-    public function updateRole() : void
-    {
-        var_dump(RoleManager::isPermitted(1));
     }
 
 }
