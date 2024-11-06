@@ -11,6 +11,7 @@
             "MxRoleManager\\": "src/"
         }
     },
+    "bin" : ["bin/role-manager"],
     "authors": [
         {
             "name": "Chehine Ammari",

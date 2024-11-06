@@ -1,4 +1,81 @@
 #!/usr/bin/env php
 <?php
 
+use MxRoleManager\CLI\CommandBus;
+use MxRoleManager\CLI\CreateTablesCommand;
+use MxRoleManager\CLI\FillPermissionsCommand;
+use MxRoleManager\CLI\Handler\CreateTablesCommandHandler;
+use MxRoleManager\CLI\Handler\FillPermissionsCommandHandler;
+use MxRoleManager\Config\ConfigManager;
+use MxRoleManager\Config\Handler\ConfigHandlerFactory;
+use MxRoleManager\Database\Connection;
+use MxRoleManager\Database\Migration\CreateTables;
+use MxRoleManager\Database\Migration\FillPermissions;
+
 require dirname(__DIR__) . '/vendor/autoload.php';
+
+// CLI Input handling
+$arguments = $argv ?? [];
+
+if (count($arguments) < 2) {
+    echo "Usage: role-manager <command> [options...]\n";
+    exit(1);
+}
+
+$commandName = $arguments[sizeof($arguments) - 1];
+
+$shortOptions = "c:u::t::p::";
+$longOptions  = [
+    "config-file:", // The colon indicates that this option requires a value
+    "update::",     // The double colon indicates that this option does not requires a value
+    "truncate::",
+    "clear-cache::",
+];
+
+$options = getopt($shortOptions, $longOptions);
+
+$commandBus = new CommandBus();
+
+// Register the handlers
+$commandBus->registerHandler(
+    CreateTablesCommand::class,
+    new CreateTablesCommandHandler(new CreateTables())
+);
+$commandBus->registerHandler(
+    FillPermissionsCommand::class,
+    new FillPermissionsCommandHandler(new FillPermissions())
+);
+
+$configurationFile = $options["config-file"] ?? null;
+$configurationManager = new ConfigManager();
+$configurationManager->addConfigHandler(ConfigHandlerFactory::createEnvHandler(getcwd()));
+$configurationManager->addConfigHandler(ConfigHandlerFactory::createPHPFileHandler($configurationFile));
+$configurationManager->flushConfigurationsToLoader();
+
+if(Connection::getPdo() == null)
+{
+    echo 'Cannot connect to database';
+    exit();
+}
+// Dispatch commands based on input
+try {
+    switch ($commandName) {
+        case 'create-tables':
+            $commandBus->handle(new CreateTablesCommand());
+            echo "Tables created successfully.\n";
+            break;
+        case 'fill-permissions':
+            $fillPermissionsCommand = new FillPermissionsCommand();
+            $fillPermissionsCommand->setIsUpdate(isset($options['update']) || isset($options['u']));
+            $fillPermissionsCommand->setIsTruncate(isset($options['truncate']) || isset($options['t']));
+            $fillPermissionsCommand->setIsClearCache(isset($options['clear-cache']) || isset($options['p']));
+            $commandBus->handle($fillPermissionsCommand);
+            echo "Permissions filled/updated successfully.\n";
+            break;
+        default:
+            echo "Unknown command: $commandName\n";
+            break;
+    }
+} catch (Exception $e) {
+    echo "Unknown error happened while handling the command";
+}

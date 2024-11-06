@@ -1,1 +1,8 @@
 /vendor
+/mysql_data
+.idea
+custom_config.php
+docker-compose-dev.yml
+result-phpinfo.html
+sandbox.php
+phpinfo.sh

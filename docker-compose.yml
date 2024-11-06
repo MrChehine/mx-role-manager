@@ -7,12 +7,17 @@ services:
             - /Volumes/Dev/MxRoleManager:/app
 
     app:
-        image: php:8.2-cli-alpine
+        build:
+            context: .
+            dockerfile: Dockerfile
         container_name: mx-role-manager-app
+        working_dir: /app
         volumes:
             - /Volumes/Dev/MxRoleManager:/app
         environment:
             - APP_ENV=prod
+        command:
+            - docker-php-ext-install mysqli pdo pdo_mysql
         depends_on:
             - db
 
@@ -20,6 +25,8 @@ services:
         image: mysql:8.1.0
         container_name: mx-role-manager-db
         restart: always
+        volumes:
+            - ./mysql_data:/var/lib/mysql
         environment:
             MYSQL_ROOT_PASSWORD: '0000'
             MYSQL_ROOT_HOST: '%'
@@ -32,6 +39,6 @@ services:
         container_name: phpmyadmin-container
         restart: always
         ports:
-            - "80:80"
+            - "8080:80"
         environment:
             PMA_HOST: db
