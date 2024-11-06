@@ -10,8 +10,6 @@ use MxRoleManager\Database\Repository\RoleManagerRepository;
 use MxRoleManager\Database\Repository\RoleRepository;
 use MxRoleManager\Model\Permission;
 use MxRoleManager\Model\Role;
-use mysql_xdevapi\Session;
-use PDO;
 
 class RoleManager
 {

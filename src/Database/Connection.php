@@ -11,11 +11,17 @@ class Connection
     private function __construct(string $hostname, string $port, string $dbname, string $username, string $password)
     {
         $dsn = "mysql:host=$hostname;port=$port;dbname=$dbname";
-        $pdo = new \PDO($dsn, $username, $password);
-        self::$pdo = $pdo;
+        try {
+            $pdo = new \PDO($dsn, $username, $password);
+            self::$pdo = $pdo;
+        } 
+        catch (\Exception $exception)
+        {
+            self::$pdo = null;    
+        }
     }
 
-    public static function getPdo() : \PDO
+    public static function getPdo() : ?\PDO
     {
         if(self::$pdo == null)
         {

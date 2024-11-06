@@ -8,6 +8,7 @@ use MxRoleManager\CLI\Handler\CreateTablesCommandHandler;
 use MxRoleManager\CLI\Handler\FillPermissionsCommandHandler;
 use MxRoleManager\Config\ConfigManager;
 use MxRoleManager\Config\Handler\ConfigHandlerFactory;
+use MxRoleManager\Database\Connection;
 use MxRoleManager\Database\Migration\CreateTables;
 use MxRoleManager\Database\Migration\FillPermissions;
 
@@ -51,6 +52,11 @@ $configurationManager->addConfigHandler(ConfigHandlerFactory::createEnvHandler(g
 $configurationManager->addConfigHandler(ConfigHandlerFactory::createPHPFileHandler($configurationFile));
 $configurationManager->flushConfigurationsToLoader();
 
+if(Connection::getPdo() == null)
+{
+    echo 'Cannot connect to database';
+    exit();
+}
 // Dispatch commands based on input
 try {
     switch ($commandName) {
