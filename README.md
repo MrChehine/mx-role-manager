@@ -43,7 +43,7 @@ Available Commands
 
 **_Note_**: The permissions configuration file should follow this format:
 ```php
-[
+return [
     'permissions' => [
         \Namespace\Class1::class => [
             [
@@ -65,7 +65,7 @@ Available Commands
             ]
         ]
     ]
-]
+];
 ```
 
 ## Code Usage
