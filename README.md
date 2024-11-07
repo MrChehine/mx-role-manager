@@ -27,8 +27,11 @@ DB_PASS=
 # Optional:
 DB_TARGET_TABLE=users
 ```
+**_Note_**: The key `DB_TARGET_TABLE` refers to the table of the entity that will have roles assigned to it. In most cases, a role is affected to one or many `users`. 
 
-Available Commands
+If it is not defined, then the default value will be `targets`. If your table name is other than `targets`, then you have to adapt the parameter's value.
+
+### Available Commands
 1. vendor/bin/role-manager create-tables
    * Creates necessary database tables for managing roles and permissions.
 
